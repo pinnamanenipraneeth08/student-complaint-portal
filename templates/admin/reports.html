@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="fas fa-chart-bar text-primary"></i> Reports & Analytics
+            </h1>
+            <p class="text-muted">System performance and complaint analytics</p>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h6 class="text-uppercase mb-1">Complaints (30 Days)</h6>
+                    <h2 class="mb-0">{{ recent_complaints }}</h2>
+                    <small>Total complaints in last month</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h6 class="text-uppercase mb-1">Completed (30 Days)</h6>
+                    <h2 class="mb-0">{{ recent_completed }}</h2>
+                    <small>Resolved in last month</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <h6 class="text-uppercase mb-1">Avg Resolution Time</h6>
+                    <h2 class="mb-0">{{ avg_resolution_hours }} hrs</h2>
+                    <small>Average time to resolve</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Priority Distribution -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-flag"></i> Priority Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for priority, count in priority_stats %}
+                        <div class="col-md-3">
+                            <div class="card border-{% if priority == 'Urgent' %}danger{% elif priority == 'High' %}warning{% elif priority == 'Medium' %}info{% else %}success{% endif %}">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">{{ priority }}</h6>
+                                    <h2 class="text-{% if priority == 'Urgent' %}danger{% elif priority == 'High' %}warning{% elif priority == 'Medium' %}info{% else %}success{% endif %}">
+                                        {{ count }}
+                                    </h2>
+                                    <small class="text-muted">complaints</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Information Cards -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> System Insights</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Most Active Department:</strong> Check department-wise stats on dashboard</li>
+                        <li><strong>Peak Hours:</strong> Monitor complaint submission patterns</li>
+                        <li><strong>Response Time:</strong> Track average department response times</li>
+                        <li><strong>Student Satisfaction:</strong> Monitor completion rates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-check-circle"></i> Performance Goals</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Target Resolution Time:</strong> Under 48 hours</li>
+                        <li><strong>Completion Rate:</strong> Above 80%</li>
+                        <li><strong>Pending Complaints:</strong> Less than 10%</li>
+                        <li><strong>Student Engagement:</strong> Active response tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

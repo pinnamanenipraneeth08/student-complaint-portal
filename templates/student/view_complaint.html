@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}{{ complaint.ticket_id }} - Student Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Complaint Details Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ticket-alt"></i> Complaint Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Ticket ID</h6>
+                            <h4 class="text-primary fw-bold">{{ complaint.ticket_id }}</h4>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-{{ complaint.get_status_color() }} fs-5">
+                                {{ complaint.status }}
+                            </span>
+                            <span class="badge bg-{{ complaint.get_priority_color() }} fs-6 ms-2">
+                                {{ complaint.priority }} Priority
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Subject</h6>
+                        <h5>{{ complaint.subject }}</h5>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Description</h6>
+                        <p class="lead">{{ complaint.description }}</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-1">Department</h6>
+                            <p><span class="badge bg-secondary">{{ complaint.department.name }}</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-1">Submitted On</h6>
+                            <p>{{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-1">Last Updated</h6>
+                            <p>{{ complaint.updated_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if complaint.expected_resolution_date %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-calendar-check"></i> <strong>Expected Resolution:</strong> 
+                        {{ complaint.expected_resolution_date.strftime('%d %b %Y') }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if complaint.attachments %}
+                    <hr>
+                    <h6 class="text-muted mb-2">Attachments</h6>
+                    <div class="row">
+                        {% for attachment in complaint.attachments %}
+                        <div class="col-md-4 mb-2">
+                            <div class="card">
+                                <div class="card-body p-2">
+                                    <i class="fas fa-file-{{ attachment.file_type }} fa-2x text-primary"></i>
+                                    <p class="mb-0 small text-truncate">{{ attachment.file_name }}</p>
+                                    <a href="{{ url_for('static', filename='uploads/' + attachment.file_path) }}" 
+                                       target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download"></i> View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Updates/Replies Section -->
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-comments"></i> Updates & Replies</h5>
+                </div>
+                <div class="card-body">
+                    {% if complaint.updates %}
+                        {% for update in complaint.updates %}
+                        <div class="card mb-3 {% if update.user_id == current_user.id %}border-primary{% else %}border-success{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-0">
+                                            {% if update.user_id == current_user.id %}
+                                                <i class="fas fa-user text-primary"></i> You
+                                            {% else %}
+                                                <i class="fas fa-user-tie text-success"></i> {{ update.user.name }} 
+                                                <small class="text-muted">({{ update.user.department.name if update.user.department else update.user.role.title() }})</small>
+                                            {% endif %}
+                                        </h6>
+                                        <small class="text-muted">
+                                            {{ update.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-{{ 'info' if update.update_type == 'status_change' else 'secondary' }}">
+                                        {{ update.update_type.replace('_', ' ').title() }}
+                                    </span>
+                                </div>
+                                <p class="mb-0">{{ update.message }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-comment-slash fa-3x mb-2"></i>
+                        <p>No updates yet. The department will respond soon.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Add Reply Form -->
+                    {% if complaint.status != 'Completed' %}
+                    <hr>
+                    <form method="POST" action="{{ url_for('student.reply_complaint', ticket_id=complaint.ticket_id) }}">
+                        <div class="mb-3">
+                            <label for="message" class="form-label fw-bold">Add Your Reply</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" 
+                                      placeholder="Type your message here..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send Reply
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> This complaint has been marked as <strong>Completed</strong>.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="{{ url_for('student.submit_complaint') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-plus-circle"></i> Submit New Complaint
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-timeline"></i> Status Timeline</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item {% if complaint.status == 'Pending' %}active{% endif %}">
+                            <i class="fas fa-clock"></i> Pending
+                        </div>
+                        <div class="timeline-item {% if complaint.status == 'In Progress' %}active{% endif %}">
+                            <i class="fas fa-spinner"></i> In Progress
+                        </div>
+                        <div class="timeline-item {% if complaint.status == 'Completed' %}active{% endif %}">
+                            <i class="fas fa-check-circle"></i> Completed
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+    border-left: 2px solid #ddd;
+    padding-left: 20px;
+    color: #999;
+}
+.timeline-item.active {
+    border-left-color: #0d6efd;
+    color: #0d6efd;
+    font-weight: bold;
+}
+.timeline-item i {
+    position: absolute;
+    left: -10px;
+    background: white;
+    border-radius: 50%;
+    padding: 3px;
+}
+</style>
+{% endblock %}

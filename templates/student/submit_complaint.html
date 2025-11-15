@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Complaint - Student Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> Submit New Complaint</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <!-- Student Information (Read-only) -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Student Name</label>
+                                <input type="text" class="form-control" value="{{ current_user.name }}" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Reg. Number</label>
+                                <input type="text" class="form-control" value="{{ current_user.registration_number }}" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Room Number</label>
+                                <input type="text" class="form-control" value="{{ current_user.room_number }}" readonly>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Department Selection -->
+                        <div class="mb-3">
+                            <label for="department_id" class="form-label fw-bold">
+                                Problem Sector <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="department_id" name="department_id" required>
+                                <option value="">-- Select Department --</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}">
+                                    <i class="fas fa-utensils"></i> {{ dept.name }} - {{ dept.description }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Subject -->
+                        <div class="mb-3">
+                            <label for="subject" class="form-label fw-bold">
+                                Subject/Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="subject" name="subject" 
+                                   placeholder="Brief title of your complaint" required maxlength="255">
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">
+                                Problem Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="6" 
+                                      placeholder="Describe your problem in detail..." required></textarea>
+                            <small class="form-text text-muted">
+                                Please provide as much detail as possible to help us resolve your issue quickly.
+                            </small>
+                        </div>
+                        
+                        <!-- Priority -->
+                        <div class="mb-3">
+                            <label for="priority" class="form-label fw-bold">Priority Level</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="Low">Low - Can wait</option>
+                                <option value="Medium" selected>Medium - Normal issue</option>
+                                <option value="High">High - Needs attention</option>
+                                <option value="Urgent">Urgent - Immediate action needed</option>
+                            </select>
+                        </div>
+                        
+                        <!-- File Upload -->
+                        <div class="mb-3">
+                            <label for="attachments" class="form-label fw-bold">
+                                Attachments (Optional)
+                            </label>
+                            <input type="file" class="form-control" id="attachments" name="attachments" 
+                                   multiple accept="image/*,video/*,.pdf">
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Upload images or videos as proof (Max 16MB per file)
+                                <br>Supported: JPG, PNG, PDF, MP4, AVI, MOV
+                            </small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('student.dashboard') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Complaint
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Information Card -->
+            <div class="card mt-4 border-info">
+                <div class="card-body">
+                    <h6 class="text-info"><i class="fas fa-info-circle"></i> Important Information</h6>
+                    <ul class="mb-0">
+                        <li>You will receive a unique <strong>Ticket ID</strong> after submission</li>
+                        <li>Track your complaint status in real-time from your dashboard</li>
+                        <li>Department will respond within 24-48 hours</li>
+                        <li>You can reply to updates from the department</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

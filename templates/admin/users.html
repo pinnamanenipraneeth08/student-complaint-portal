@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="fas fa-users text-primary"></i> User Management
+            </h1>
+            <p class="text-muted">Manage all system users</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus"></i> Create New User
+            </a>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h6>Total Users</h6>
+                    <h2>{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <h6>Students</h6>
+                    <h2>{{ students }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h6>Department Users</h6>
+                    <h2>{{ department_users }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Filter by Role</label>
+                    <select name="role" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if role_filter == 'all' %}selected{% endif %}>All Roles</option>
+                        <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students</option>
+                        <option value="department" {% if role_filter == 'department' %}selected{% endif %}>Department</option>
+                        <option value="warden" {% if role_filter == 'warden' %}selected{% endif %}>Wardens</option>
+                        <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admins</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> All Users</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Registration/Room</th>
+                            <th>Status</th>
+                            <th>Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td><strong>{{ user.name }}</strong></td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge bg-{% if user.role == 'admin' %}danger{% elif user.role == 'student' %}info{% else %}success{% endif %}">
+                                    {{ user.role.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.department %}
+                                    <span class="badge bg-secondary">{{ user.department.name }}</span>
+                                {% else %}
+                                    <em class="text-muted">N/A</em>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_student %}
+                                    {{ user.registration_number }}<br>
+                                    <small class="text-muted">Room: {{ user.room_number }}</small>
+                                {% else %}
+                                    <em class="text-muted">N/A</em>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.created_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                {% if not user.is_admin %}
+                                <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                    <button type="submit" class="btn btn-sm btn-{% if user.is_active %}warning{% else %}success{% endif %}">
+                                        <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
+                                        {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">Protected</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

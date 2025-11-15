@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Department Dashboard - Student Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="fas fa-building text-primary"></i> Department Dashboard
+            </h1>
+            <p class="text-muted">{{ current_user.name }} | {{ current_user.department.name }} Department</p>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total</h6>
+                            <h2 class="mb-0">{{ total_complaints }}</h2>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Pending</h6>
+                            <h2 class="mb-0">{{ pending }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">In Progress</h6>
+                            <h2 class="mb-0">{{ in_progress }}</h2>
+                        </div>
+                        <i class="fas fa-spinner fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Completed</h6>
+                            <h2 class="mb-0">{{ completed }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Status Filter</label>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                        <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="In Progress" {% if status_filter == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Priority Filter</label>
+                    <select name="priority" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All Priorities</option>
+                        <option value="Urgent" {% if priority_filter == 'Urgent' %}selected{% endif %}>Urgent</option>
+                        <option value="High" {% if priority_filter == 'High' %}selected{% endif %}>High</option>
+                        <option value="Medium" {% if priority_filter == 'Medium' %}selected{% endif %}>Medium</option>
+                        <option value="Low" {% if priority_filter == 'Low' %}selected{% endif %}>Low</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <a href="{{ url_for('department.dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Complaints Table -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Complaints for {{ current_user.department.name }} Department</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if complaints %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Student</th>
+                            <th>Room</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr class="{% if complaint.priority == 'Urgent' %}table-danger{% endif %}">
+                            <td><strong>{{ complaint.ticket_id }}</strong></td>
+                            <td>{{ complaint.student.name }}</td>
+                            <td>{{ complaint.student.room_number }}</td>
+                            <td>{{ complaint.subject[:50] }}...</td>
+                            <td>
+                                <span class="badge bg-{{ complaint.get_status_color() }}">
+                                    {{ complaint.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ complaint.get_priority_color() }}">
+                                    {{ complaint.priority }}
+                                </span>
+                            </td>
+                            <td>{{ complaint.created_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('department.view_complaint', ticket_id=complaint.ticket_id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No complaints found</h5>
+                <p class="text-muted">All caught up! No complaints matching your filters.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
