@@ -192,9 +192,10 @@ This project is developed for educational purposes.
 
 ## 👨‍💻 Developer
 
-**Your Name**  
-KL University  
-📧 Contact: your.email@klu.ac.in
+**MANIKANTA RAGAVA ,PINNAMANENI PRANEETH,KANCHETI CHAITANYA**  
+KALASALINGAM 
+University  
+📧 Contact: 99220040818@klu.ac.in
 
 ## 🐛 Bug Reports
 
